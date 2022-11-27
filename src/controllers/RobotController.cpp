@@ -3,6 +3,7 @@
 // Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry All rights reserved.
 //
 using namespace ofxRobotArm;
+
 RobotController::RobotController(){
     
 }
@@ -35,7 +36,7 @@ void RobotController::setup(string ipAddress, RobotType type, bool offline){
     
     previewArm.setup(type); // should be called sim or desired or something
     
-    jointWeights.assign(6, 1.0f);
+    jointWeights.assign(7, 1.0f);
     urKinematics = URIKFast(type);
     
     // setup actual robot
