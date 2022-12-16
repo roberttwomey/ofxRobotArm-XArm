@@ -4,7 +4,7 @@
 #pragma once
 #include "ofMain.h"
 #include "URJoint.h"
-#include "ofxUrDriver.h"
+#include "ofxXArmDriver.h"
 
 namespace ofxRobotArm{
     class RobotParameters{

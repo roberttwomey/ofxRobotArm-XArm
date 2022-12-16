@@ -25,14 +25,14 @@ Technical development was lead by [Dan Moore](http://makeitdoathing.com) with ex
 ## Dependencies
 After download, you can run the `installAddons.sh` script to clone all the external addons used in the `ofxRobotArm` examples.  
 
-- ofxURDriver
+- ofxXArmDriver
 - ofxCV
 - ofxGizmo
 - ofxTimeline
 - ofxPtf
 
 ## Overview
-`ofxRobotArm` is structured as two parts: `ofxURDriver` holds the specific control software and kinematic model for a [UR5](http://www.universal-robots.com/products/ur5-robot/) robot; `ofxRobotArm` holds the generic tools and techniques for controlling and interacting with a robot arm. `ofxURDriver` adapts ThomasTimm's [ur_modern_driver](https://github.com/ThomasTimm/ur_modern_driver) package for ROS to openFrameworks. To customize `ofxRobotArm` to work with your specific model and brand of robot, use `ofxURDriver` as a template for your robot's kinematic model and control protocol.
+`ofxRobotArm` is structured as two parts: `ofxXArmDriver` holds the specific control software and kinematic model for a [UR5](http://www.universal-robots.com/products/ur5-robot/) robot; `ofxRobotArm` holds the generic tools and techniques for controlling and interacting with a robot arm. `ofxXArmDriver` adapts ThomasTimm's [ur_modern_driver](https://github.com/ThomasTimm/ur_modern_driver) package for ROS to openFrameworks. To customize `ofxRobotArm` to work with your specific model and brand of robot, use `ofxXArmDriver` as a template for your robot's kinematic model and control protocol.
 
 
 ## Examples

@@ -12,7 +12,7 @@
 //#include "UR5KinematicModel.h"
 //#include "UR10KinematicModel.h"
 #include "RobotKinematicModel.h"
-#include "ofxURDriver.h"
+#include "ofxXArmDriver.h"
 //#include "RobotController.h"
 
 namespace ofxRobotArm {

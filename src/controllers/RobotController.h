@@ -3,9 +3,9 @@
 //
 #pragma once
 #include "ofMain.h"
-#include "ofxURDriver.h"
+#include "ofxXArmDriver.h"
 #include "RobotParameters.h"
-#include "URIKFast.h"
+#include "XArmIKFast.h"
 #include "RobotKinematicModel.h"
 #include "ofxIKArm.h"
 #include "RobotArmSafety.h"
@@ -75,7 +75,7 @@ namespace ofxRobotArm {
         
         void close();
         vector<double> getCurrentPose();
-        ofxURDriver robot;
+        ofxXArmDriver robot;
         URMove movement;
 //        RobotParameters * robotParams;
         RobotParameters robotParams;
@@ -85,7 +85,7 @@ namespace ofxRobotArm {
         vector<RobotKinematicModel*> previewArms;
         
         RobotKinematicModel actualArm;
-        URIKFast urKinematics;
+        XArmIKFast urKinematics;
         int stopCount = 0;
         shared_ptr< ofxIKArm > mIKArm;
         shared_ptr< ofxIKArm > mIKArmInverted;

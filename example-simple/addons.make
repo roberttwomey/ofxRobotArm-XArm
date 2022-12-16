@@ -7,5 +7,5 @@ ofxOsc
 ofxPtf
 ofxRobotArm
 ofxTiming
-ofxURDriver
+ofxXArmDriver
 ofxXmlSettings

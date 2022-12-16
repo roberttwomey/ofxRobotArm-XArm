@@ -37,7 +37,7 @@ void RobotController::setup(string ipAddress, RobotType type, bool offline){
     previewArm.setup(type); // should be called sim or desired or something
     
     jointWeights.assign(7, 1.0f);
-    urKinematics = URIKFast(type);
+    urKinematics = XArmIKFast(type);
     
     // setup actual robot
     actualArm.setup(type);
@@ -103,8 +103,8 @@ void RobotController::setup(string ipAddress, RobotParameters & params, bool off
     
     jointWeights.assign(6, 1.0f);
     
-    // Set up URIKFast with dynamic RobotType
-    urKinematics = URIKFast(params.get_robot_type());
+    // Set up XArmIKFast with dynamic RobotType
+    urKinematics = XArmIKFast(params.get_robot_type());
 }
 
 vector<double> RobotController::getCurrentPose(){
