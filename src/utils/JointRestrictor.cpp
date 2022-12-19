@@ -16,7 +16,7 @@ ofParameterGroup & JointRestrictor::setup() {
     params.add( mMaxGlobalAngle.set("MaxGlobalAngle", 360, -360, 360 ));
     params.add( m_bLimitElbow.set("LimitElbow", false) );
     
-    for( int i = 0; i < 6; i++ ) {
+    for( int i = 0; i < 7; i++ ) {
         ofParameter< bool > bApplyLimit;
         bApplyLimit.set("ApplyLimit_"+ofToString(i,0), false );
         m_bApplyLimits.push_back( bApplyLimit );

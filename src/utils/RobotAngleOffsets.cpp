@@ -12,7 +12,7 @@ ofParameterGroup &  RobotAngleOffsets::setup(bool abAddInvAngles, bool abAddScal
     params.setName( "RobotArmOffsets" );
     
     params.add( bReset.set("Reset", false ));
-    for( int i = 0; i < 6; i++ ) {
+    for( int i = 0; i < 7; i++ ) {
         ofParameter< float > tinv;
         tinv.set( "InvAddAngle_"+ofToString(i,0), 0.0f, -180.0f, 180.0f );
         if(abAddInvAngles) {

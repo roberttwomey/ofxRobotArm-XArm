@@ -82,7 +82,7 @@ namespace ofxRobotArm {
         ofParameter< float > mMaxCorrectiveAngle;
         ofParameter< float > mSpherePadding;
         shared_ptr< RobotKinematicModel > mModel, mPredictiveModel;
-//        shared_ptr< UR5KinematicModel > mModel, mPredictiveModel;
+//        shared_ptr<UR5KinematicModel > mModel, mPredictiveModel;
         vector< Appendage > mAppendages, mPredictiveAppendages;
         vector< double > mDesiredAngles;
         float mResetPct = 0.0f;

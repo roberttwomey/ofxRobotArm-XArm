@@ -37,7 +37,7 @@ void RobotController::setup(string ipAddress, RobotType type, bool offline){
     previewArm.setup(type); // should be called sim or desired or something
     
     jointWeights.assign(7, 1.0f);
-    urKinematics = XArmIKFast(type);
+    xarmKinematics = XArmIKFast(type);
     
     // setup actual robot
     actualArm.setup(type);
@@ -50,6 +50,14 @@ void RobotController::setup(string ipAddress, RobotType type, bool offline){
         robot.setAllowReconnect(true);
     }
     robot.setup(ipAddress,0,1);
+    
+    // does it solve the crashes?
+    targetPose.assign(7, 0.0f);
+
+    // debugging targetPose
+    // ofLog() << "initial targetPose: " << targetPose[0] << " " << targetPose[1] << " " << targetPose[2]
+    //     << " " << targetPose[3] << " " << targetPose[4] << " " << targetPose[5]
+    //     << " " << targetPose[6];
 }
 
 void RobotController::setEndEffector(string filename){
@@ -86,7 +94,6 @@ void RobotController::setup(string ipAddress, RobotParameters & params, bool off
     this->params.add( mIKRampEndPct.set("IKRampEndPct", 1.5, 1.0, 2.0 ));
     this->params.add( mIKRampHeightPct.set("IKRampHeightPct", 0.3, 0.0, 1.0 ));
     
-    
     movement.setup();
     for(int i = 0; i < 1; i++){//8; i++){
         RobotKinematicModel * foo = new RobotKinematicModel();
@@ -101,10 +108,10 @@ void RobotController::setup(string ipAddress, RobotParameters & params, bool off
  
     robotParams.jointsIK.add(this->params);
     
-    jointWeights.assign(6, 1.0f);
+    jointWeights.assign(7, 1.0f);
     
     // Set up XArmIKFast with dynamic RobotType
-    urKinematics = XArmIKFast(params.get_robot_type());
+    xarmKinematics = XArmIKFast(params.get_robot_type());
 }
 
 vector<double> RobotController::getCurrentPose(){
@@ -407,110 +414,137 @@ void RobotController::updateIKFast(){
     // update the plane that visualizes the robot flange
     tcp_plane.update(robotParams.targetTCP.position*1000, robotParams.targetTCP.rotation);
 
-    targetPoses = urKinematics.inverseKinematics(robotParams.targetTCP);
-    int selectedSolution = urKinematics.selectSolution(targetPoses, robot.getCurrentPose(), jointWeights);
+    targetPoses = xarmKinematics.inverseKinematics(robotParams.targetTCP);
+    ofLog() << "RobotController.updateIKFast() found " << targetPoses.size() << " solutions.";
+
+    int selectedSolution = xarmKinematics.selectSolution(targetPoses, robot.getCurrentPose(), jointWeights);
+
     if(selectedSolution > -1){
         targetPose = targetPoses[selectedSolution];
+
         for(int i = 0; i < targetPose.size(); i++){
             float tpose = (float)targetPose[i];
-            if( isnan(tpose) ) {
-                tpose = 0.f;
-            }
+
+            // if( isnan(tpose) ) {
+            //     tpose = 0.f;
+            // }
             
             // FIXME: Joint Wrapping
             // limit joints by a buffer to minimize joint wrapping
-            float buffer = ofDegToRad(2);
-            tpose = ofMap(tpose, ofDegToRad(-360), ofDegToRad(360), ofDegToRad(-360) + buffer, ofDegToRad(360) - buffer);
-            // map Joint 0 to +angle only (only tested at 180º)
-            if (tpose < 0 && i == 0){
-                tpose = ofMap(tpose, ofDegToRad(-360), 0, 0, ofDegToRad(360));
-            }
-            // lock Joint 6 to 0º
-            else if (i==5){
-                tpose = 0;
-            }
-            targetPose[i] = tpose;
+            // float buffer = ofDegToRad(2);
+            // tpose = ofMap(tpose, ofDegToRad(-360), ofDegToRad(360), ofDegToRad(-360) + buffer, ofDegToRad(360) - buffer);
             
+            // removed because UR specific 
+            // // map Joint 0 to +angle only (only tested at 180º)
+            // if (tpose < 0 && i == 0){
+            //     tpose = ofMap(tpose, ofDegToRad(-360), 0, 0, ofDegToRad(360));
+            // }
+            // // lock Joint 6 to 0º
+            // else if (i==5){
+            //     tpose = 0;
+            // }
+            
+            targetPose[i] = tpose;
             robotParams.ikPose[i] = tpose;
         }
+        ofLog() << "targetPose: " << targetPose[0] << " " << targetPose[1] 
+            << " " << targetPose[2] << " " << targetPose[3] 
+            << " " << targetPose[4] << " " << targetPose[5] 
+            << " " << targetPose[6];
+    } else {
+        ofLog() << "xarmKinematics.inverseKinematics(): no solution";
     }
 }
 
 void RobotController::updateIKArm(){
-    targetPoses = urKinematics.inverseKinematics(robotParams.targetTCP);
-    int selectedSolution = urKinematics.selectSolution(targetPoses, robot.getCurrentPose(), jointWeights);
-    if(selectedSolution > -1){
-        targetPose = targetPoses[selectedSolution];
-        for(int i = 0; i < targetPose.size(); i++){
-            float tpose = (float)targetPose[i];
-            if( isnan(tpose) ) {
-                tpose = 0.f;
-            }
+    // targetPoses = xarmKinematics.inverseKinematics(robotParams.targetTCP);
+    // int selectedSolution = xarmKinematics.selectSolution(targetPoses, robot.getCurrentPose(), jointWeights);
+    // if(selectedSolution > -1){
+    //     targetPose = targetPoses[selectedSolution];
+    //     for(int i = 0; i < targetPose.size(); i++){
+    //         float tpose = (float)targetPose[i];
+    //         if( isnan(tpose) ) {
+    //             tpose = 0.f;
+    //         }
             
-            robotParams.ikPose[i] = tpose;
-        }
+    //         robotParams.ikPose[i] = tpose;
+    //     }
         
-        for(int i = 0; i < targetPoses.size(); i++)
-        {
-            previewArms[i]->setPose(targetPoses[i]);
-        }
-    }
-    for(int i = 0; i < targetPose.size(); i++){
-        float tpose = (float)targetPose[i];
-        if( isnan(tpose) ) {
-            tpose = 0.f;
-        }
-        robotParams.targetPose[i] = ofRadToDeg(tpose);
-    }
-    targetPose = getArmIK(1.0/60.0f);
-    for(int i = 0; i < targetPose.size(); i++){
-        float tpose = (float)targetPose[i];
-        if( isnan(tpose) ) {
-            tpose = 0.f;
-        }
-        robotParams.targetPose[i] = ofRadToDeg(tpose);
-    }
+    //     for(int i = 0; i < targetPoses.size(); i++)
+    //     {
+    //         previewArms[i]->setPose(targetPoses[i]);
+    //     }
+    // }
+    // for(int i = 0; i < targetPose.size(); i++){
+    //     float tpose = (float)targetPose[i];
+    //     if( isnan(tpose) ) {
+    //         tpose = 0.f;
+    //     }
+    //     robotParams.targetPose[i] = ofRadToDeg(tpose);
+    // }
+    // targetPose = getArmIK(1.0/60.0f);
+    // for(int i = 0; i < targetPose.size(); i++){
+    //     float tpose = (float)targetPose[i];
+    //     if( isnan(tpose) ) {
+    //         tpose = 0.f;
+    //     }
+    //     robotParams.targetPose[i] = ofRadToDeg(tpose);
+    // }
     
-    // update the look at angles after the IK has been applied //
-    // overrides the angles and sets them directly //
-    // alters joint[3] && joint[4]
-    vector< double > lookAtAngles = lookAtJoints(1.0/60.0f);
-    // determine if these angles should be added or not //
-    for( int i = 0; i < targetPose.size(); i++ ) {
-        targetPose[i] = lookAtAngles[i];
-    }
+    // // update the look at angles after the IK has been applied //
+    // // overrides the angles and sets them directly //
+    // // alters joint[3] && joint[4]
+    // vector< double > lookAtAngles = lookAtJoints(1.0/60.0f);
+    // // determine if these angles should be added or not //
+    // for( int i = 0; i < targetPose.size(); i++ ) {
+    //     targetPose[i] = lookAtAngles[i];
+    // }
     
-    previewArm.setPose(targetPose);
+    // previewArm.setPose(targetPose);
 }
+
 
 #pragma mark - Update
 void RobotController::update(){
-    updateRobotData();
+    // updateRobotData();
     if(robotParams.bUseIKFast){
-        updateIKFast();
+        ofLog() << "numiterations: " << stopCount;
+        updateIKFast(); // XARM we are doing this
     }else if(robotParams.bUseIKArm){
         updateIKArm();
     }
-    
-//    safetyCheck();
-    updateMovement();
-      targetPose = movement.getTargetJointPose();
-    for(int i = 0; i < targetPose.size(); i++){
-        float tpose = (float)targetPose[i];
-        if( isnan(tpose) ) {
-            tpose = 0.f;
-        }
-        robotParams.targetPose[i] = ofRadToDeg(tpose);
-    }
-    previewArm.setPose(targetPose);
-#ifdef PRINT_POSE
-    cout << "target pose:\t[";
-    for (auto p : targetPose){
-        cout << ofRadToDeg(p) << ", ";
-    }
-    cout << "]" << endl;
-#endif
+    ofLog() << "updatedIKFast";
+    // safetyCheck();
+    // ofLog() << "safetyCheck";
+    // updateMovement();
+    // ofLog() << "updateMovement";
+//     targetPose = movement.getTargetJointPose();
+//     ofLog() << "movement.getTargetJointPose()";
+//     for(int i = 0; i < targetPose.size(); i++){
+//         float tpose = (float)targetPose[i];
+//         if( isnan(tpose) ) {
+//             tpose = 0.f;
+//         }
+//         robotParams.targetPose[i] = ofRadToDeg(tpose);
+//     }
+//     previewArm.setPose(targetPose);
+//     ofLog() << "previewArm.setPose(targetPos)";
+// #ifdef PRINT_POSE
+//     cout << "target pose (deg): [";
+//     for (auto p : targetPose){
+//         cout << ofRadToDeg(p) << ", ";
+//     }
+//     cout << "]" << endl;
+//     cout << "target pose (rad): [";
+//     for (auto p : targetPose){
+//         cout << p << ", ";
+//     }
+//     cout << "]" << endl;
+
+// #endif
+    stopCount ++;
 }
+
 void RobotController::update(vector<double> _pose){
     targetPose = _pose;
     update();
@@ -530,12 +564,22 @@ void RobotController::set_live(bool val){
 #pragma mark - Safety
 void RobotController::safetyCheck(){
 
-    
-    robotSafety.setCurrentRobotArmAnlges(robot.getCurrentPose());
+    robotSafety.setCurrentRobotArmAngles(robot.getCurrentPose());
+    vector<double> thisPose = robot.getCurrentPose();
+#ifdef PRINT_POSE
+    ofLog() << "robot.getCurrentPose: " << thisPose[0] << " " << thisPose[1] << " " << thisPose[2]
+        << " " << thisPose[3] << " " << thisPose[4] << " " << thisPose[5]
+        << " " << thisPose[6];
+#endif
     robotSafety.setDesiredAngles(targetPose);
+#ifdef PRINT_POSE
+    ofLog() << "targetPose: " << targetPose[0] << " " << targetPose[1] << " " << targetPose[2]
+        << " " << targetPose[3] << " " << targetPose[4] << " " << targetPose[5]
+        << " " << targetPose[6];
+#endif
     robotSafety.update(previewArm);
     robotSafety.update(1/60);
-    targetPose = robotSafety.getDesiredAngles();
+    // targetPose = robotSafety.getDesiredAngles();
     
 }
 
@@ -543,6 +587,7 @@ void RobotController::safetyCheck(){
 void RobotController::updateMovement(){
     movement.addTargetJointPose(targetPose);
     movement.update();
+    
     // move the robot to the target TCP
     if(robotParams.bMove){
         //        robot.setSpeed(tempSpeeds, movement.getAcceleration());
@@ -579,7 +624,7 @@ void RobotController::updateRobotData(){
     for(int i = 0; i < robotParams.currentPose.size(); i++){
         robotParams.pCurrentPose[i] = ofRadToDeg((float)robotParams.currentPose[i]);
     }
-    ofMatrix4x4 forwardIK = urKinematics.forwardKinematics(robotParams.currentPose);
+    ofMatrix4x4 forwardIK = xarmKinematics.forwardKinematics(robotParams.currentPose);
     
     movement.setCurrentJointPose(robotParams.currentPose);
 }

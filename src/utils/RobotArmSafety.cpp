@@ -10,7 +10,7 @@ using namespace ofxRobotArm;
 
 //--------------------------------------------------------------
 ofParameterGroup &  RobotArmSafety::setup(RobotType type) {
-    mTargetRobotAngles.assign( 6, 0.0 );
+    mTargetRobotAngles.assign(7, 0.0 );
     
     params.setName( "RobotSafety" );
     params.add( m_angleLerp.set("AngleLerp", 0.76, 0.0001, 1.0f ));
@@ -26,13 +26,14 @@ ofParameterGroup &  RobotArmSafety::setup(RobotType type) {
     params.add(mCylinderRestrictor->setup());
     
     mCollision = shared_ptr< RobotArmCollision >( new RobotArmCollision() );
-    params.add(mCollision->setup(type));
+    mCollision->setup(type);
+    // params.add(mCollision->setup(type));
     return params;
 }
 
 //--------------------------------------------------------------
 ofParameterGroup &  RobotArmSafety::setup() {
-    mTargetRobotAngles.assign( 6, 0.0 );
+    mTargetRobotAngles.assign(7, 0.0 );
     
     params.setName( "RobotSafety" );
     params.add( m_angleLerp.set("AngleLerp", 0.76, 0.0001, 1.0f ));
@@ -48,19 +49,19 @@ ofParameterGroup &  RobotArmSafety::setup() {
     params.add(mCylinderRestrictor->setup());
     
     mCollision = shared_ptr< RobotArmCollision >( new RobotArmCollision() );
-//    params.add(mCollision->setup()); //<---uncomment if using this setup() call
+    mCollision->setup(RobotType::XARM7);
+    // params.add(mCollision->setup()); //<---uncomment if using this setup() call
     return params;
 }
 
 //--------------------------------------------------------------
 void RobotArmSafety::setDesiredAngles( vector< double > aangles ) {
     mDesiredAngles = aangles;
-    
 }
 
 
 //--------------------------------------------------------------
-void RobotArmSafety::setCurrentRobotArmAnlges( vector< double > aRobotArmAngles ) {
+void RobotArmSafety::setCurrentRobotArmAngles( vector< double > aRobotArmAngles ) {
     mCurrentRobotArmAngles = aRobotArmAngles;
     if( mCollision ) mCollision->setRobotAngles( aRobotArmAngles );
 }
@@ -110,20 +111,21 @@ void RobotArmSafety::update( float aDeltaTimef ) {
     // this will check against the actual robot position and alter the desired angles if it
     // detects a potential collision //
     // this will use the desired angles inside the robot man //
+    ofLog() << "\tgonna checkCollision()";
     checkCollision(mCurrentRobotArmAngles, mDesiredAngles);
-    
+    ofLog() << "\tcheckCollision()";
     
     m_jointRestrictor->update( aDeltaTimef );
     mCylinderRestrictor->update( aDeltaTimef );
     
     float tEpsilon  = (m_angleEpsilon * DEG_TO_RAD) * aDeltaTimef * 60.f;
     bool bWeAllGood = true;
+
     // we desire nothing, do not move forward //
     if( mDesiredAngles.size() == 0 ) bWeAllGood = false;
     if( mCurrentRobotArmAngles.size() == 0 ) bWeAllGood = false;
     
     bool bOKeyPressed = ofGetKeyPressed('o');
-    
     
     if( m_bWithinCylinder && bWeAllGood ) {
         
@@ -205,8 +207,7 @@ void RobotArmSafety::update( float aDeltaTimef ) {
             tdesiredAngle = m_jointRestrictor->getRestricted(i,tdesiredAngle);
             
             // START SPEED BASED ACCEL LIMIT
-            
-            
+
             float deltaFromCurrentToDesired = ofAngleDifferenceRadians(mCurrentRobotArmAngles[i], tdesiredAngle);
             float curFrameDesiredSpeed = deltaFromCurrentToDesired/aDeltaTimef;
             
@@ -299,7 +300,10 @@ void RobotArmSafety::update( float aDeltaTimef ) {
 }
 
 void RobotArmSafety::checkCollision(vector<double> actual, vector<double> target){
+    ofLog() << "\tgonna mCollision->shouldApply() ";
+    ofLog() << mCollision;
     if( mCollision->shouldApply() ) {
+        ofLog() << "\tmCollision->shouldApply()";
         mCollision->setRobotAngles(actual);
         mCollision->setDesiredAngles( target );
         mCollision->update( mDeltaTime );

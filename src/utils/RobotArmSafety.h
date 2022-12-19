@@ -21,7 +21,7 @@ namespace ofxRobotArm {
         ofParameterGroup & setup();
         ofParameterGroup & setup(RobotType type);
         void setDesiredAngles( vector< double > aangles );
-        void setCurrentRobotArmAnlges( vector< double > aRobotArmAngles );
+        void setCurrentRobotArmAngles( vector< double > aRobotArmAngles );
 //        void update(RobotController& aRobotController );
         void update( float aDeltaTimef );
 //        void update( UR10KinematicModel& previewArm );

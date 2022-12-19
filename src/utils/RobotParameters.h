@@ -32,24 +32,22 @@ namespace ofxRobotArm{
             joints.setName("Joint Pos");
             targetJoints.setName("Target Joints");
             jointsIK.setName("IK Solver");
-            for(int i = 0; i < 6; i++){
+            
+            // 7 joints for XARM7
+            for(int i = 0; i < 7; i++){
                 pCurrentPose.push_back(ofParameter<float>());
                 joints.add(pCurrentPose.back().set("actual joint "+ofToString(i), 0, -360, 360));
             }
             
-            for(int i = 0; i < 6; i++){
+            for(int i = 0; i < 7; i++){
                 targetPose.push_back(ofParameter<float>());
                 targetJoints.add(targetPose.back().set("target joint "+ofToString(i), 0, -360, 360));
                 ikPose.push_back(ofParameter<float>());
                 jointsIK.add(ikPose.back().set("ik joint "+ofToString(i), 0, -360, 360));
             }
             
-
-            
             pathRecorderParams.setName("Path Recording");
             pathRecorderParams.add(bRecord.set("Record", false));
-            
-            
             
             
             joints.add(tcpPosition.set("Actual Robot TCP POS", ofVec3f(0, 0, 0), ofVec3f(-1, -1, -1), ofVec3f(1, 1, 1)));

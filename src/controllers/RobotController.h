@@ -10,6 +10,9 @@
 #include "ofxIKArm.h"
 #include "RobotArmSafety.h"
 #include "URUtils.h"
+
+#define PRINT_POSE
+
 namespace ofxRobotArm {
     
 
@@ -85,7 +88,7 @@ namespace ofxRobotArm {
         vector<RobotKinematicModel*> previewArms;
         
         RobotKinematicModel actualArm;
-        XArmIKFast urKinematics;
+        XArmIKFast xarmKinematics;
         int stopCount = 0;
         shared_ptr< ofxIKArm > mIKArm;
         shared_ptr< ofxIKArm > mIKArmInverted;

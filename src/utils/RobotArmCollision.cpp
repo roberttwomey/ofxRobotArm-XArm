@@ -28,7 +28,7 @@ using namespace ofxRobotArm;
 //
 //    bool bAddSlidersToPanel = true;
 //    // diff paddings for each joint //
-//    for( int i = 0; i < 6; i++ ) {
+//    for( int i = 0; i < 7; i++ ) {
 //        ofParameter< float > tpad;
 //        float tdefault = 10.0f;
 //        if( i == 1 ) {
@@ -48,6 +48,7 @@ using namespace ofxRobotArm;
 //
 //    return params;
 //}
+
 ofParameterGroup &  RobotArmCollision::setup(RobotType type) {
     mModel = shared_ptr< RobotKinematicModel >( new RobotKinematicModel() );
     mModel->setup(type);
@@ -64,10 +65,11 @@ ofParameterGroup &  RobotArmCollision::setup(RobotType type) {
     params.add( mMaxCorrectiveAngle.set("MaxCorrectiveAngle", 45, 5, 180 ));
     params.add( mSpherePadding.set("SpherePadding", 1.25, 0.5, 3.f ));
     
-    
     bool bAddSlidersToPanel = true;
     // diff paddings for each joint //
-    for( int i = 0; i < 6; i++ ) {
+
+    // CHANGED TO 7 FOR XARM
+    for( int i = 0; i < 7; i++ ) {
         ofParameter< float > tpad;
         float tdefault = 10.0f;
         if( i == 1 ) {
@@ -81,8 +83,6 @@ ofParameterGroup &  RobotArmCollision::setup(RobotType type) {
         if(bAddSlidersToPanel) params.add( tpad );
         mPaddings.push_back( tpad );
     }
-    
-    
     sphereMesh = ofMesh::icosphere( 1 );
     
     return params;
